@@ -6,6 +6,7 @@ import * as Font from 'expo-font';
 import { View } from 'react-native';
 import CreateProfile from './src/screens/CreateProfile';
 import Login from './src/screens/Login';
+import MainNavigator from './src/navigation/MainNavigator';
 
 const Stack = createStackNavigator();
 
@@ -35,14 +36,10 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login"
-      screenOptions={{
-        headerShown: false, // Desabilitar cabeçalho para personalizar
-      }}
-      >
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false}}>
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="CreateAccount" component={CreateProfile} />
-      
+      <Stack.Screen name="Home" component={MainNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -57,7 +57,7 @@ export default StyleSheet.create({
     right: 10,
     height: '100%',
     justifyContent: 'center',
-    color: '#FFFFFF', // Cor do ícone
+    color: theme.colors.text,
   },
   locationInputContainer: {
     flexDirection: 'row',
@@ -95,5 +95,16 @@ export default StyleSheet.create({
   errorText: {
     color: theme.colors.error,
     marginBottom: 15,
+  },
+  logoContainer: {
+    position: 'absolute',
+    bottom: 20,
+    alignItems: 'center',
+    width: '100%',
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    resizeMode: 'contain',
   },
 });

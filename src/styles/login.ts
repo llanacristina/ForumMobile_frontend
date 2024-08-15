@@ -101,4 +101,15 @@ export default StyleSheet.create({
     fontFamily: theme.fonts.medium,
     textDecorationLine: 'underline',
   },
+  logoContainer: {
+    position: 'absolute',
+    bottom: 20,
+    alignItems: 'center',
+    width: '100%',
+  },
+  logo: {
+    width: 100, 
+    height: 100,
+    resizeMode: 'contain',
+  },
 });
