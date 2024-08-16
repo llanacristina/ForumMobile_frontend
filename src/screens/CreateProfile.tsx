@@ -1,11 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useContext, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import styles from '../styles/createProfile';
 import theme from '../styles/theme';
+import { Ionicons } from '@expo/vector-icons';
 import Api from '../services/axios';
+import { UserContext } from '../contexts/user';
 
-const CreateAccountScreen = () => {
+const CreateAccountScreen = ({ navigation }: any) => {
+  const userContext = useContext(UserContext);
+
+  if (!userContext) {
+    throw new Error('UserContext must be used within a UserProvider');
+  }
+
+  const { setUser } = userContext;
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,13 +39,22 @@ const CreateAccountScreen = () => {
         location,
       });
       console.log('Conta criada com sucesso:', response.data);
+      setUser({
+        token: response.data.token,
+        id: response.data.id,
+        username: response.data.username,
+        email: response.data.email,
+        profileURL: response.data.profileURL,
+        location: response.data.location || '', // Definindo como string vazia por padrão
+      });
+      navigation.navigate('Main', { screen: 'HomeScreen' });
     } catch (error) {
       console.error('Erro ao criar conta:', error);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Criar uma conta</Text>
       <Text style={styles.subtitle}>Crie sua conta abaixo</Text>
 
@@ -90,19 +107,13 @@ const CreateAccountScreen = () => {
         />
       </View>
 
-      <View style={styles.locationInputContainer}>
+      <View style={styles.inputContainer}>
         <TextInput
-          style={styles.locationInput}
-          placeholder="Selecione sua localização"
+          style={styles.input}
+          placeholder="Localização"
           placeholderTextColor={theme.colors.text}
           onChangeText={setLocation}
           value={location}
-        />
-        <Ionicons
-          name="location-outline"
-          size={24}
-          color="#FFFFFF"
-          style={styles.locationIcon}
         />
       </View>
 
@@ -112,11 +123,11 @@ const CreateAccountScreen = () => {
 
       <View style={styles.logoContainer}>
         <Image
-          source={require('../../assets/logomarca.png')}
+          source={require('../assets/logomarca.png')}
           style={styles.logo}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

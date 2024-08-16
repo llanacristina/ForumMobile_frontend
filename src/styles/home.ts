@@ -8,17 +8,6 @@ export default StyleSheet.create({
     padding: 16,
     paddingTop: 50,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  logo :{
-    width: 30,
-    height:30,
-    resizeMode: 'contain',
-  },
   newPostContainer: {
     flexDirection: 'row',
     backgroundColor: theme.colors.painting,
