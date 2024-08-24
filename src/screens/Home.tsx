@@ -1,13 +1,35 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, FlatList, Modal, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
+import { View, FlatList, Modal, TextInput, TouchableOpacity, Text, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
 import styles from '../styles/home';
 import modalStyles from '../styles/modal';
 import Header from '../components/Header';
+import  { Post } from '../types/object'; 
+import CardPost from '../components/CardPost'
 
-const posts = [
-  // Dados fictícios para os posts
-  { id: '1', user: 'Usuario1', content: 'Postagem 1' },
-  { id: '2', user: 'Usuario2', content: 'Postagem 2' },
+//Exemplos ficticios
+const posts2: Post[] = [
+  {
+    id: '1',
+    title: 'Título do Post 1',
+    content: 'Conteúdo da Postagem 1',
+    date: new Date(),
+    user: {
+      userID: 'user1',
+      name: 'Usuario1',
+      profileURL: 'default-profile-url.png',
+    },
+  },
+  {
+    id: '2',
+    title: 'Título do Post 2',
+    content: 'Conteúdo da Postagem 2',
+    date: new Date(),
+    user: {
+      userID: 'user2',
+      name: 'Usuario2',
+      profileURL: 'default-profile-url.png',
+    },
+  },
 ];
 
 const HomeScreen = ({ navigation }: any) => {
@@ -15,8 +37,8 @@ const HomeScreen = ({ navigation }: any) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
-  const handleLogout = () => {
-    // Lógica para sair da conta
+  const handleLogoutSuccess = () => {
+    navigation.navigate('Login');
   };
 
   const handlePost = () => {
@@ -25,7 +47,7 @@ const HomeScreen = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-      <Header onLogout={handleLogout} />
+      <Header onLogout={handleLogoutSuccess} />
 
       <View style={styles.newPostContainer}>
         <Text style={styles.newPostText}>O que há de novo?</Text>
@@ -35,14 +57,9 @@ const HomeScreen = ({ navigation }: any) => {
       </View>
 
       <FlatList
-        data={posts}
+        data={posts2}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.postContainer}>
-            <Text style={styles.postUser}>{item.user}</Text>
-            <Text style={styles.postContent}>{item.content}</Text>
-          </View>
-        )}
+        renderItem={({ item }) => <CardPost post={item} />} 
       />
 
       <Modal

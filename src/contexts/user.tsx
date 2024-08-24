@@ -3,11 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type User = {
   token: string | null;
-  id: string | null;
-  username: string | null;
-  email: string | null;
-  profileURL: string | null;
-  location?: string;
+  id: string; 
+  username: string; 
+  email: string;
+  profileURL: string; 
+  location?: string; 
 };
 
 type UserContextProps = {
@@ -24,20 +24,20 @@ type UserProviderProps = {
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User>({
     token: null,
-    id: null,
-    username: null,
-    email: null,
-    profileURL: null,
-    location: '', // Definindo como string vazia por padrão
+    id: '', 
+    username: '', 
+    email: '', 
+    profileURL: '',
+    location: '', 
   });
 
   useEffect(() => {
-    // Função para recuperar os dados do usuário armazenados
     const loadUserData = async () => {
       try {
         const userData = await AsyncStorage.getItem('user');
         if (userData) {
-          setUser(JSON.parse(userData));
+          const parsedUser: User = JSON.parse(userData);
+          setUser(parsedUser);
         }
       } catch (error) {
         console.error('Erro ao recuperar dados do usuário:', error);
@@ -48,7 +48,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    // Função para salvar os dados do usuário no AsyncStorage
     const saveUserData = async () => {
       try {
         await AsyncStorage.setItem('user', JSON.stringify(user));
@@ -57,7 +56,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
     };
 
-    if (user.token) { // Apenas salva se o token existir
+    if (user.token) { 
       saveUserData();
     }
   }, [user]);

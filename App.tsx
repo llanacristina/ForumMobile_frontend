@@ -8,6 +8,7 @@ import CreateProfile from './src/screens/CreateProfile';
 import Login from './src/screens/Login';
 import MainNavigator from './src/navigation/MainNavigator';
 import { UserProvider } from './src/contexts/user';
+import AppStartScreen from './src/screens/AppStart';
 
 const Stack = createStackNavigator();
 
@@ -38,7 +39,8 @@ export default function App() {
   return (
     <UserProvider>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false}}>
+      <Stack.Navigator initialRouteName="AppStart" screenOptions={{ headerShown: false}}>
+      <Stack.Screen name="AppStart" component={AppStartScreen} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="CreateAccount" component={CreateProfile} />
       <Stack.Screen name="Main" component={MainNavigator} />

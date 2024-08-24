@@ -15,21 +15,36 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#B0B0B0',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: theme.colors.defaultColor
+  },
+  editIcon: {
+    right: 20,
+    bottom: -40,
+    backgroundColor: theme.colors.defaultColor,
+    borderRadius: 50,
+    padding: 5,
   },
   profileInfo: {
     marginLeft: 16,
   },
+  email: {
+    fontSize: 16,
+    fontFamily:theme.fonts.regular,
+    color: theme.colors.defaultColor,
+  },
   profileName: {
+    marginBottom:20,
     fontSize: 18,
+    fontFamily:theme.fonts.regular,
     color: theme.colors.text,
   },
   profileLocation: {
     fontSize: 14,
     color: theme.colors.text,
+    fontFamily:theme.fonts.regular,
     marginTop: 4,
   },
   threeDotsIcon: {
@@ -45,12 +60,13 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily:theme.fonts.bold,
     color: theme.colors.text,
   },
   statLabel: {
     fontSize: 14,
-    color: theme.colors.text
+    color: theme.colors.text,
+    fontFamily:theme.fonts.regular,
   },
 });
 

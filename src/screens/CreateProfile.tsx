@@ -5,6 +5,7 @@ import theme from '../styles/theme';
 import { Ionicons } from '@expo/vector-icons';
 import Api from '../services/axios';
 import { UserContext } from '../contexts/user';
+import { storeToken } from '../services/token';
 
 const CreateAccountScreen = ({ navigation }: any) => {
   const userContext = useContext(UserContext);
@@ -39,6 +40,9 @@ const CreateAccountScreen = ({ navigation }: any) => {
         location,
       });
       console.log('Conta criada com sucesso:', response.data);
+      
+      await storeToken(response.data.token);
+
       setUser({
         token: response.data.token,
         id: response.data.id,
@@ -47,6 +51,7 @@ const CreateAccountScreen = ({ navigation }: any) => {
         profileURL: response.data.profileURL,
         location: response.data.location || '', // Definindo como string vazia por padrão
       });
+
       navigation.navigate('Main', { screen: 'HomeScreen' });
     } catch (error) {
       console.error('Erro ao criar conta:', error);

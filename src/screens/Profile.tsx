@@ -1,13 +1,18 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { UserContext } from '../contexts/user';
 import Header from '../components/Header';
 import styles from '../styles/profile';
+import { storeUserData } from '../services/userData';
+import { useNavigation } from '@react-navigation/native';
+import { NavigationProp } from '../types/types';
+import { host } from '../services/axios';
 
 const ProfileScreen = () => {
   const userContext = useContext(UserContext);
+  const navigation = useNavigation<NavigationProp>();
 
   if (!userContext) {
     throw new Error('UserContext must be used within a UserProvider');
@@ -16,8 +21,27 @@ const ProfileScreen = () => {
   const { user, setUser } = userContext;
   const [postsCount, setPostsCount] = useState(''); 
   const [commentsCount, setCommentsCount] = useState(''); 
+  const [profileURL, setProfileURL] = useState<string | null>(null);
 
-  // Função para fazer upload de imagem
+  async function getProfilePic() {
+    const imageUrl = `http://${host}:3000/public/custom-pfp/${user.id}.png`;
+
+    try {
+      const response = await fetch(imageUrl, { method: 'HEAD' });
+      if (response.ok) {
+        setProfileURL(imageUrl);
+      } else {
+        setProfileURL(user.profileURL ? `http://${host}:3000/public/custom-pfp/${user.profileURL}` : null);
+      }
+    } catch (error) {
+      console.error('Ocorreu um erro ao verificar a existência da imagem:', error);
+    }
+  }
+
+  useEffect(() => {
+    getProfilePic();
+  }, [user.id]);
+
   const handleImageUpload = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -33,28 +57,37 @@ const ProfileScreen = () => {
     });
 
     if (!result.canceled) {
-      const newProfileURL = result.assets[0].uri; 
-      setUser({ ...user, profileURL: newProfileURL });
+      const newProfileURL = result.assets[0].uri;
+      setProfileURL(newProfileURL);
+      if (user) {
+        setUser({ ...user, profileURL: newProfileURL });
+        await storeUserData({ ...user, profileURL: newProfileURL });
+      }
     }
   };
 
-  function handleLogout() {
-    // Adicione sua lógica de logout aqui
-  }
+  const handleLogout = async () => {
+    navigation.navigate('Login');
+  };
 
   return (
     <View style={styles.container}>
       <Header onLogout={handleLogout} />
 
       <View style={styles.profileHeader}>
-        <TouchableOpacity onPress={handleImageUpload}>
           <Image
-            source={{ uri: user.profileURL || 'https://example.com/default-profile.png' }}
-            style={styles.profileImage}
+            source={{ uri: profileURL || 'http://default-placeholder-image-url.com' }}
+            style={styles.profileImage} 
           />
-        </TouchableOpacity>
+        <TouchableOpacity
+            style={styles.editIcon}
+            onPress={handleImageUpload}
+          >
+            <Ionicons name="pencil" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
         <View style={styles.profileInfo}>
           <Text style={styles.profileName}>{user.username}</Text>
+          <Text style={styles.email}>{user.email}</Text>
           <Text style={styles.profileLocation}>{user.location || 'Localização não definida'}</Text>
         </View>
         <TouchableOpacity style={styles.threeDotsIcon}>

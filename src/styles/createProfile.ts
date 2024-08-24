@@ -11,7 +11,6 @@ export default StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
     color: theme.colors.text,
@@ -89,7 +88,6 @@ export default StyleSheet.create({
   buttonText: {
     color: theme.colors.text,
     fontSize: 18,
-    fontWeight: 'bold',
     fontFamily: theme.fonts.bold,
   },
   errorText: {

@@ -9,7 +9,9 @@ const theme = {
     text: '#FFFFFF', // Cor do texto
     error: '#FF0000', // Cor de erro 
     menu: '#270740', // Cor de fundo do menu
-    painting: '#13042C' // Cor dos quadros 
+    painting: '#13042C', // Cor dos quadros 
+    date: '#888', //Cor da data
+    defaultColor:'#B0B0B0' //Cor usar de default
   },
   fonts: {
     regular: 'Poppins-Regular', // Fonte regular
