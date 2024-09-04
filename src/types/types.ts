@@ -4,6 +4,9 @@ export type RootStackParamList = {
   Login: undefined;
   CreateAccount: undefined;
   Profile: undefined;
+  Home: undefined;
+  Main: { screen: string };
+  Edit: undefined;
   // Adicione outras telas aqui
 };
 

@@ -28,7 +28,9 @@ const retrieveUserData = async (): Promise<IUserData | null> => {
 // Função para armazenar os dados do usuário
 const storeUserData = async (data: IUserData): Promise<void> => {
   try {
+    if (data !== undefined && data !== null) {
     await AsyncStorage.setItem(USER_DATA_KEY, JSON.stringify(data));
+    }
   } catch (error) {
     console.error('Erro ao armazenar dados do usuário:', error);
   }

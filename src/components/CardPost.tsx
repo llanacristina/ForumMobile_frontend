@@ -8,7 +8,7 @@ const CardPost: React.FC<{ post: Post }> = ({ post }) => {
   const [profileURL, setProfileURL] = useState<string | null>(null);
 
   async function getProfilePic() {
-    if (!post.user.userID) {
+    if (!post.user || !post.user.userID)  {
       setProfileURL(null);
       return;
     }
@@ -29,7 +29,11 @@ const CardPost: React.FC<{ post: Post }> = ({ post }) => {
 
   useEffect(() => {
     getProfilePic();
-  }, [post.user.userID]);
+  }, [post.user?.userID]);
+
+  if (!post.user) {
+    return <Text>Carregando...</Text>;  // Adicione uma mensagem ou um componente de loading
+  }
 
   return (
     <View style={styles.cardContainer}>
@@ -51,7 +55,7 @@ const CardPost: React.FC<{ post: Post }> = ({ post }) => {
 
       <View style={styles.footer}>
         <Text style={styles.comments}>{`${post.commentsCount || 0} Comentários`}</Text>
-        <Text style={styles.date}>{post.date.toLocaleDateString()}</Text>
+        <Text style={styles.date}>{new Date(post.date).toLocaleDateString()}</Text> 
       </View>
     </View>
   );

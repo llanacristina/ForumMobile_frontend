@@ -33,8 +33,13 @@ const cardPost = StyleSheet.create({
     color: theme.colors.text,
     fontSize: 16,
     fontFamily: theme.fonts.bold,
-    marginBottom:40,
+    marginBottom:10,
   },
+  // titleSeparator: {
+  //   borderBottomColor: theme.colors.defaultColor, // Cor da linha
+  //   borderBottomWidth: 0.5, 
+  //   marginBottom: 20, 
+  // },
   contentContainer: {
     marginTop: 10,
   },

@@ -1,53 +1,101 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, FlatList, Modal, TextInput, TouchableOpacity, Text, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
 import styles from '../styles/home';
 import modalStyles from '../styles/modal';
 import Header from '../components/Header';
 import  { Post } from '../types/object'; 
 import CardPost from '../components/CardPost'
+import { deleteToken } from '../services/token';
+import { deleteUserData } from '../services/userData';
+import { UserContext } from '../contexts/user';
+import Api from '../services/axios';
 
-//Exemplos ficticios
-const posts2: Post[] = [
-  {
-    id: '1',
-    title: 'Título do Post 1',
-    content: 'Conteúdo da Postagem 1',
-    date: new Date(),
-    user: {
-      userID: 'user1',
-      name: 'Usuario1',
-      profileURL: 'default-profile-url.png',
-    },
-  },
-  {
-    id: '2',
-    title: 'Título do Post 2',
-    content: 'Conteúdo da Postagem 2',
-    date: new Date(),
-    user: {
-      userID: 'user2',
-      name: 'Usuario2',
-      profileURL: 'default-profile-url.png',
-    },
-  },
-];
+const initialPosts: Post[] = [];
 
 const HomeScreen = ({ navigation }: any) => {
+  const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
-  const handleLogoutSuccess = () => {
-    navigation.navigate('Login');
+  const userContext = useContext(UserContext);
+
+  if (!userContext) {
+    return <Text>Carregando...</Text>;
+  }
+  const { user } = userContext;
+
+
+  const handleLogout = async() => {
+    try {
+      await deleteUserData();
+      await deleteToken();
+      console.log('Dados do usuário e token excluídos.');
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (error) {
+      console.error('Erro ao realizar logout:', error);
+    }
   };
 
-  const handlePost = () => {
-    // Lógica para criar um novo post
+  const fetchPosts = async () => {
+    try {
+      const response = await Api.get('/posts/');
+      //console.log(response.data); // Logar para verificar a estrutura dos dados
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar posts:', error);
+    }
   };
+
+  const handlePost = async () => {
+    if (!title || !content) {
+      return;
+    }
+
+    if (!user) {
+      console.error('Usuário não autenticado');
+      return;
+    }
+
+    try {
+      const newPost = {
+        title,
+        content,
+        user: {
+          userID: user.id,
+          name: user.username,
+          profileURL: user.profileURL,
+        },
+        commentsCount: 0,
+        date: new Date(),
+      };
+
+      const response = await Api.post('/posts/', newPost);
+      console.log('Post criado com sucesso!');
+
+      setPosts((prevPosts) => [response.data, ...prevPosts]);
+
+         // Atualize os posts após a criação
+      fetchPosts();
+
+      setTitle('');
+      setContent('');
+      setIsModalVisible(false);
+    } catch (error) {
+      console.error('Erro ao criar o post:', error);
+    }
+  };
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   return (
     <View style={styles.container}>
-      <Header onLogout={handleLogoutSuccess} />
+      <Header onLogout={handleLogout} />
 
       <View style={styles.newPostContainer}>
         <Text style={styles.newPostText}>O que há de novo?</Text>
@@ -57,10 +105,10 @@ const HomeScreen = ({ navigation }: any) => {
       </View>
 
       <FlatList
-        data={posts2}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <CardPost post={item} />} 
-      />
+         data={posts}
+         keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()} 
+         renderItem={({ item }) => <CardPost post={item} />}
+         />
 
       <Modal
         visible={isModalVisible}

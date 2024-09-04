@@ -17,7 +17,7 @@ export interface Post {
   id: string;
   title: string;
   content: string;
-  date: Date;
+  date: string;
   user: {
     userID: string;
     name: string;

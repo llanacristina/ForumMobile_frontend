@@ -68,6 +68,11 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontFamily:theme.fonts.regular,
   },
+  postsContainer: {
+    // marginTop: 20,
+    // paddingHorizontal: 10,
+    paddingBottom:16
+  },
 });
 
 export default styles;

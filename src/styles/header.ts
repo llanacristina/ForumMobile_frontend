@@ -12,6 +12,9 @@ const styles = StyleSheet.create({
     height:30,
     resizeMode: 'contain',
   },
+  iconContainer: {
+    paddingHorizontal: 10,
+  }
 });
 
 export default styles;
