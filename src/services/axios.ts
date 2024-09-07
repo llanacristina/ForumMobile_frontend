@@ -1,7 +1,7 @@
 import axios from "axios";
 import {retrieveToken } from '../services/token';
 
-export const host = '192.168.2.3';
+export const host = '192.168.1.8';
 
 const Api = axios.create({
   baseURL: `http://${host}:3000`,
