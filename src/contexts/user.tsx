@@ -7,12 +7,14 @@ export type User = {
   username: string; 
   email: string;
   profileURL: string; 
-  location?: string; 
+  location: string; 
 };
 
 type UserContextProps = {
   user: User;
   setUser: React.Dispatch<React.SetStateAction<User>>;
+  posts: any[];
+  setPosts: (posts: any[]) => void;
 };
 
 export const UserContext = createContext<UserContextProps | undefined>(undefined);
@@ -30,6 +32,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     profileURL: '',
     location: '', 
   });
+
+  const [posts, setPosts] = useState<any[]>([]);
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -62,7 +66,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   }, [user]);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser,posts, setPosts  }}>
       {children}
     </UserContext.Provider>
   );

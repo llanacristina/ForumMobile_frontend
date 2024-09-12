@@ -10,6 +10,7 @@ import MainNavigator from './src/navigation/MainNavigator';
 import { UserProvider } from './src/contexts/user';
 import AppStartScreen from './src/screens/AppStart';
 import EditScreen from './src/screens/Edit';
+import MapScreen from './src/screens/MapScreen';
 
 const Stack = createStackNavigator();
 
@@ -45,6 +46,7 @@ export default function App() {
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Edit" component={EditScreen} />
       <Stack.Screen name="CreateAccount" component={CreateProfile} />
+      <Stack.Screen name="MapScreen" component={MapScreen} />
       <Stack.Screen name="Main" component={MainNavigator} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,9 +1,9 @@
 export type User = {
-  token: string | null;
-  id: string | null;
-  username: string | null;
-  email: string | null;
-  profileURL: string | null;
+  token: string ;
+  id: string ;
+  username: string ;
+  email: string;
+  profileURL: string ;
   location?: string;
 };
 

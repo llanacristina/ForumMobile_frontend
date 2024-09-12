@@ -105,4 +105,25 @@ export default StyleSheet.create({
     height: 100,
     resizeMode: 'contain',
   },
+  locationText: {
+    color: theme.colors.text,
+    fontSize: 16,
+  },
+  locationButton: {
+    backgroundColor: theme.colors.primary, 
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  inputWithIcon: {
+    position: 'relative',
+  },
+  mapIcon: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    transform: [{ translateY: -12 }],
+  },
 });

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import styles from '../styles/createProfile';
 import theme from '../styles/theme';
@@ -6,9 +6,14 @@ import { Ionicons } from '@expo/vector-icons';
 import Api from '../services/axios';
 import { UserContext } from '../contexts/user';
 import { storeToken } from '../services/token';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { RootStackParamList } from '../types/types';
+
+type CreateAccountRouteProp = RouteProp<RootStackParamList, 'CreateAccount'>;
 
 const CreateAccountScreen = ({ navigation }: any) => {
   const userContext = useContext(UserContext);
+  const route = useRoute<CreateAccountRouteProp>();
 
   if (!userContext) {
     throw new Error('UserContext must be used within a UserProvider');
@@ -22,6 +27,13 @@ const CreateAccountScreen = ({ navigation }: any) => {
   const [location, setLocation] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
 
+   useEffect(() => {
+    if (route.params?.newLocation) {
+      const { latitude, longitude } = route.params.newLocation;
+      setLocation(`${latitude}, ${longitude}`);
+    }
+  }, [route.params?.newLocation]);
+  
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -32,30 +44,41 @@ const CreateAccountScreen = ({ navigation }: any) => {
       return;
     }
 
+    const [lat, lon] = location.split(',').map(coord => coord.trim());
     try {
-      const response = await Api.post('/users/', {
+      const userResponse = await Api.post('/users/', {
         username,
         email,
         password,
-        location,
+        location: { lat, lon }, 
       });
-      console.log('Conta criada com sucesso:', response.data);
+      console.log('Conta criada com sucesso:', userResponse.data);
       
-      await storeToken(response.data.token);
+      await storeToken(userResponse.data.token);
 
       setUser({
-        token: response.data.token,
-        id: response.data.id,
-        username: response.data.username,
-        email: response.data.email,
-        profileURL: response.data.profileURL,
-        location: response.data.location || '', // Definindo como string vazia por padrão
+        token: userResponse.data.token,
+        id: userResponse.data.id,
+        username: userResponse.data.username,
+        email: userResponse.data.email,
+        profileURL: userResponse.data.profileURL,
+        location: userResponse.data.location || '',
       });
+
+      await Api.post('/localizations/', {
+      lon: route.params?.newLocation?.longitude, 
+      lat: route.params?.newLocation?.latitude,
+      userID: userResponse.data.id, 
+    });
 
       navigation.navigate('Main', { screen: 'HomeScreen' });
     } catch (error) {
       console.error('Erro ao criar conta:', error);
     }
+  };
+
+  const navigateToMap = () => {
+    navigation.navigate('MapScreen')
   };
 
   return (
@@ -113,13 +136,16 @@ const CreateAccountScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Localização"
-          placeholderTextColor={theme.colors.text}
-          onChangeText={setLocation}
-          value={location}
-        />
+        <TouchableOpacity onPress={navigateToMap} style={styles.inputWithIcon}>
+          <TextInput
+            style={styles.input}
+            placeholder="Localização"
+            placeholderTextColor="#FFFFFF"
+            value={location}
+            editable={false} 
+          />
+          <Ionicons name="map" size={24} color="#FFFFFF" style={styles.mapIcon} />
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>

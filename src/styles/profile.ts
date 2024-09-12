@@ -20,18 +20,11 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: theme.colors.defaultColor
   },
-  editIcon: {
-    right: 20,
-    bottom: -40,
-    backgroundColor: theme.colors.defaultColor,
-    borderRadius: 50,
-    padding: 5,
-  },
   profileInfo: {
     marginLeft: 16,
   },
   email: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily:theme.fonts.regular,
     color: theme.colors.defaultColor,
   },
@@ -46,6 +39,12 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontFamily:theme.fonts.regular,
     marginTop: 4,
+    flexDirection: 'column', 
+  },
+  locationItem: {
+    marginBottom: 4, 
+    fontFamily:theme.fonts.regular,
+    color: theme.colors.defaultColor,
   },
   threeDotsIcon: {
     marginLeft: 'auto',
@@ -69,8 +68,6 @@ const styles = StyleSheet.create({
     fontFamily:theme.fonts.regular,
   },
   postsContainer: {
-    // marginTop: 20,
-    // paddingHorizontal: 10,
     paddingBottom:16
   },
 });

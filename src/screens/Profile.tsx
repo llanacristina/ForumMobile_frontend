@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image, Alert, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
 import { UserContext } from '../contexts/user';
 import Header from '../components/Header';
 import styles from '../styles/profile';
@@ -25,6 +24,7 @@ const ProfileScreen = () => {
   const [commentsCount, setCommentsCount] = useState<string>(''); 
   const [profileURL, setProfileURL] = useState<string | null>(null);
   const [posts, setPosts] = useState<any[]>([]);
+
 
   async function getProfilePic() {
     const imageUrl = `http://${host}:3000/public/custom-pfp/${user.id}.png`;
@@ -55,31 +55,15 @@ const ProfileScreen = () => {
   useEffect(() => {
     getProfilePic();
     getUserPosts();
-  }, [user.id, user.username]);
+  }, [user.id, user.username, user.profileURL]);
 
-  const handleImageUpload = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permissão necessária', 'Precisamos da sua permissão para acessar as fotos.');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      getUserPosts();
     });
 
-    if (!result.canceled) {
-      const newProfileURL = result.assets[0].uri;
-      setProfileURL(newProfileURL);
-      if (user) {
-        setUser({ ...user, profileURL: newProfileURL });
-        await storeUserData({ ...user, profileURL: newProfileURL });
-      }
-    }
-  };
+    return unsubscribe;
+  }, [navigation]);
 
   const handleLogout = async () => {
     try {
@@ -99,6 +83,21 @@ const ProfileScreen = () => {
   const handleEditProfile = () => {
     navigation.navigate('Edit');
   };
+
+  const formatLocation = (location: any) => {
+    if (typeof location === 'string') {
+      return location;
+    } else if (location && typeof location === 'object') {
+      return (
+        <View>
+          <Text style={styles.locationItem}>Latitude: {location.lat}</Text>
+          <Text style={styles.locationItem}>Longitude: {location.lon}</Text>
+        </View>
+      );
+    }
+    return 'Localização não definida';
+  };
+
   return (
     <View style={styles.container}>
       <Header onLogout={handleLogout} />
@@ -108,16 +107,10 @@ const ProfileScreen = () => {
           source={{ uri: profileURL || 'http://default-placeholder-image-url.com' }}
           style={styles.profileImage}
         />
-        <TouchableOpacity
-          style={styles.editIcon}
-          onPress={handleImageUpload}
-        >
-          <Ionicons name="pencil" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
         <View style={styles.profileInfo}>
           <Text style={styles.profileName}>{user.username}</Text>
           <Text style={styles.email}>{user.email}</Text>
-          <Text style={styles.profileLocation}>{user.location || 'Localização não definida'}</Text>
+          <Text style={styles.profileLocation}>{formatLocation(user.location)}</Text>
         </View>
         <TouchableOpacity 
           style={styles.threeDotsIcon}
