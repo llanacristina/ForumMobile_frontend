@@ -105,10 +105,14 @@ const HomeScreen = ({ navigation }: any) => {
       </View>
 
       <FlatList
-         data={posts}
-         keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()} 
-         renderItem={({ item }) => <CardPost post={item} />}
-         />
+        data={posts}
+        keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()}
+        renderItem={({ item }) => (
+      <TouchableOpacity onPress={() => navigation.navigate('AddCommentScreen', { post: item })}>
+      <CardPost post={item} />
+      </TouchableOpacity>
+  )}
+/>
 
       <Modal
         visible={isModalVisible}
