@@ -6,17 +6,19 @@ import Header from '../components/Header';
 import styles from '../styles/profile';
 import { deleteUserData, storeUserData } from '../services/userData';
 import { useNavigation } from '@react-navigation/native';
-import { NavigationProp } from '../types/types';
+import { NavigationProp, Post } from '../types/types';
 import Api, { host } from '../services/axios';
 import { deleteToken } from '../services/token';
 import CardPost from '../components/CardPost';
+import { PostContext } from '../contexts/post';
 
 const ProfileScreen = () => {
   const userContext = useContext(UserContext);
+  const postContext = useContext(PostContext);
   const navigation = useNavigation<NavigationProp>();
 
-  if (!userContext) {
-    throw new Error('UserContext must be used within a UserProvider');
+  if (!userContext || !postContext) {
+    return <Text>Carregando...</Text>;
   }
 
   const { user, setUser } = userContext;
@@ -47,6 +49,25 @@ const ProfileScreen = () => {
       const postsData = response.data;
       setPosts(postsData);
       setPostsCount(postsData.length.toString());
+
+      const commentsResponse = await Api.get('/comments/');
+      const commentsData = commentsResponse.data;
+
+      const commentsCount = commentsData.reduce((acc: any, comment: any) => {
+        acc[comment.postId] = (acc[comment.postId] || 0) + 1;
+        return acc;
+      }, {});
+
+      const postsWithCommentsCount = postsData.map((post: Post) => ({
+        ...post,
+        commentsCount: commentsCount[post._id] || 0,
+      }));
+
+      setPosts(postsWithCommentsCount);
+
+    const totalCommentsCount = postsWithCommentsCount.reduce((acc: any, post: any) => acc + (post.commentsCount || 0), 0);
+    setCommentsCount(totalCommentsCount.toString());
+
     } catch (error) {
       console.error('Erro ao buscar posts do usuário:', error);
     }
@@ -60,6 +81,7 @@ const ProfileScreen = () => {
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       getUserPosts();
+      getProfilePic();
     });
 
     return unsubscribe;
@@ -81,7 +103,7 @@ const ProfileScreen = () => {
   };
 
   const handleEditProfile = () => {
-    navigation.navigate('Edit');
+    navigation.navigate('Edit', {profileURL});
   };
 
   const formatLocation = (location: any) => {
@@ -97,6 +119,11 @@ const ProfileScreen = () => {
     }
     return 'Localização não definida';
   };
+
+ const handleCardPress = (post: any) => {
+  postContext.setSelectedPost(post);
+  navigation.navigate('AddCommentScreen', { postId: post.id });
+};
 
   return (
     <View style={styles.container}>
@@ -135,7 +162,12 @@ const ProfileScreen = () => {
          <FlatList
          data={posts}
          keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()} 
-         renderItem={({ item }) => <CardPost post={item} />}
+         renderItem={({ item }) => 
+         <CardPost post={item} 
+         showComments={true}
+         showDate={true}
+         onPress={() => handleCardPress(item)} 
+         />}
          contentContainerStyle={styles.postsContainer}
          showsVerticalScrollIndicator={false}
          />

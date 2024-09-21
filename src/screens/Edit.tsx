@@ -1,35 +1,37 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import Header from '../components/Header';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { NavigationProp } from '../types/types';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/edit';
 import { UserContext } from '../contexts/user';
 import Api from '../services/axios';
-import { storeUserData } from '../services/userData';
+import { deleteUserData, storeUserData } from '../services/userData';
+import { deleteToken } from '../services/token';
 
 const EditProfileScreen = () => {
   const userContext = useContext(UserContext);
   const navigation = useNavigation<NavigationProp>();
-
+  const route = useRoute();
+  
   if (!userContext) {
     throw new Error('UserContext must be used within a UserProvider');
   }
 
   const { user, setUser, setPosts } = userContext;
+  const { profileURL } = route.params as { profileURL: string | null };
 
   const [username, setUsername] = useState(user.username);
   const [email, setEmail] = useState(user.email);
   const [location, setLocation] = useState(user.location || '');
-  const [profileURL, setProfileURL] = useState<string | null>(user.profileURL || null);
+  const [profileImage, setProfileImage] = useState<string | null>(user.profileURL || null);
 
   const handleBackPress = () => {
     navigation.navigate('Profile');
   };
 
-// Função para recarregar os posts do usuário
 const fetchUserPosts = async (username: string) => {
   try {
     const response = await Api.get(`/posts/user/${user.username}`);
@@ -112,20 +114,16 @@ const fetchUserPosts = async (username: string) => {
         });
   
         if (response.status === 200) {
-          const newProfileURL = response.data.profileURL;
-          setProfileURL(newProfileURL);
-  
-          const updatedUser = { ...user, profileURL: newProfileURL };
-          setUser(updatedUser);
-          await storeUserData(updatedUser);
-  
-          Alert.alert('Sucesso', 'Imagem de perfil atualizada com sucesso!');
-        } else {
-          Alert.alert('Erro', 'Falha ao atualizar a imagem de perfil.');
+        const updatedUser = { ...user, profileURL: selectedImage };
+        setUser(updatedUser);
+        await storeUserData(updatedUser); 
+
+          setProfileImage(selectedImage);
+          Alert.alert('Sucesso', 'Foto de perfil atualizada com sucesso!');
         }
       } catch (error) {
-        console.error('Erro ao enviar imagem:', error);
-        Alert.alert('Erro', 'Ocorreu um erro ao tentar enviar a imagem. Tente novamente.');
+        console.error('Erro ao atualizar a foto de perfil:', error);
+        Alert.alert('Erro', 'Não foi possível atualizar a foto de perfil.');
       }
     }
   };
@@ -144,7 +142,13 @@ const fetchUserPosts = async (username: string) => {
       });
   
       if (!confirmed) return;
-       await Api.get(`/users/delete/${user?.id}`); 
+
+      await Api.get(`/posts/delete/${user.id}`); 
+
+       await Api.get(`/users/delete/${user.id}`); 
+
+      await deleteUserData();
+      await deleteToken();
  
         navigation.navigate('Login');
   
@@ -188,13 +192,6 @@ const fetchUserPosts = async (username: string) => {
           onChangeText={setEmail}
           placeholder="Email"
           placeholderTextColor={styles.placeholderColor.color}
-        />
-        <TextInput 
-          style={styles.input} 
-          value={location}
-          onChangeText={setLocation}
-          placeholder="Localização"
-          placeholderTextColor={styles.placeholderColor.color} 
         />
       </View>
 

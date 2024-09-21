@@ -1,6 +1,6 @@
 export type User = {
   token: string ;
-  id: string ;
+  _id: string ;
   username: string ;
   email: string;
   profileURL: string ;
@@ -14,7 +14,8 @@ export type UserContextProps = {
 
 export interface Post {
   commentsCount: number;
-  id: string;
+  comments: { content: string; user: { name: string; profileURL: string; userID: string; } }[];
+  _id: string;
   title: string;
   content: string;
   date: string;
@@ -24,5 +25,19 @@ export interface Post {
     profileURL: string | null;
   };
 }
+
+export interface Comment {
+  _id: string;
+  content: string;
+  date: string;
+  postId: string;
+  user: {
+    _id: string;
+    name: string;
+    profileURL: string;
+    userID: string;
+  };
+}
+
 
 

@@ -6,7 +6,7 @@ export type User = {
   id: string; 
   username: string; 
   email: string;
-  profileURL: string; 
+  profileURL: string | null; 
   location: string; 
 };
 

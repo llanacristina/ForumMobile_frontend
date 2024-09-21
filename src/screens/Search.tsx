@@ -47,7 +47,23 @@ const SearchScreen = () => {
     try {
       if (user) {
         const response = await Api.get(`/posts/user/${user.username}`);
+        const postsData = response.data;
         setPosts(response.data);
+
+      const commentsResponse = await Api.get('/comments/');
+      const commentsData = commentsResponse.data;
+
+      const commentsCount = commentsData.reduce((acc: any, comment: any) => {
+        acc[comment.postId] = (acc[comment.postId] || 0) + 1;
+        return acc;
+      }, {});
+
+      const postsWithCommentsCount = postsData.map((post: Post) => ({
+        ...post,
+        commentsCount: commentsCount[post._id] || 0,
+      }));
+
+      setPosts(postsWithCommentsCount);
       }
     } catch (error) {
       console.error('Erro ao buscar postagens do usuário:', error);
@@ -207,14 +223,14 @@ const SearchScreen = () => {
       {selectedTab === 'Postagens' || selectedTab === 'Todos' ? (
         <FlatList
           data={filteredPosts.length > 0 ? filteredPosts : posts}
-          keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()}
+          keyExtractor={(item) => item._id ? item._id.toString() : Math.random().toString()}
           renderItem={({ item }) => <CardPost post={item} />}
           contentContainerStyle={{ paddingBottom: 20 }}
         />
       ) : (
         <FlatList
           data={filteredUsers}
-          keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()}
+          keyExtractor={(item) => item._id ? item._id.toString() : Math.random().toString()}
           renderItem={({ item }) => <UserCard user={item} />}
           contentContainerStyle={{ paddingBottom: 20 }}
         />

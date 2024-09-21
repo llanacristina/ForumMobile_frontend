@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { User } from '../types/object';
 import { host } from '../services/axios';
 import styles from '../styles/CardUser';
@@ -8,12 +8,12 @@ const UserCard: React.FC<{user : User}> = ({ user }) => {
   const [profileURL, setProfileURL] = useState<string | null>(null);
 
   async function getProfilePic() {
-    if (!user.id) {
+    if (!user._id) {
       setProfileURL(null);
       return;
     }
 
-    const imageUrl = `http://${host}:3000/public/custom-pfp/${user.id}.png`;
+    const imageUrl = `http://${host}:3000/public/custom-pfp/${user._id}.png`;
     try {
       const response = await fetch(imageUrl, { method: 'HEAD' });
       if (response.ok) {
@@ -29,7 +29,7 @@ const UserCard: React.FC<{user : User}> = ({ user }) => {
 
   useEffect(() => {
     getProfilePic();
-  }, [user.id]);
+  }, [user._id]);
 
   return (
     <View style={styles.container}>

@@ -11,6 +11,8 @@ import { UserProvider } from './src/contexts/user';
 import AppStartScreen from './src/screens/AppStart';
 import EditScreen from './src/screens/Edit';
 import MapScreen from './src/screens/MapScreen';
+import AddCommentScreen from './src/screens/AddCommentScreen';
+import { PostProvider } from './src/contexts/post';
 
 const Stack = createStackNavigator();
 
@@ -39,17 +41,20 @@ export default function App() {
   }
 
   return (
-    <UserProvider>
-    <NavigationContainer>
+  <NavigationContainer>
+    <PostProvider>
+     <UserProvider>
       <Stack.Navigator initialRouteName="AppStart" screenOptions={{ headerShown: false}}>
       <Stack.Screen name="AppStart" component={AppStartScreen} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Edit" component={EditScreen} />
       <Stack.Screen name="CreateAccount" component={CreateProfile} />
       <Stack.Screen name="MapScreen" component={MapScreen} />
+      <Stack.Screen name="AddCommentScreen" component={AddCommentScreen} />
       <Stack.Screen name="Main" component={MainNavigator} />
       </Stack.Navigator>
-    </NavigationContainer>
-  </UserProvider>
+    </UserProvider>
+   </PostProvider>
+  </NavigationContainer>
   );
 }
