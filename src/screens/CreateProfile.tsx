@@ -1,15 +1,30 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
-import styles from '../styles/createProfile';
-import theme from '../styles/theme';
+import { useForm, Controller } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Ionicons } from '@expo/vector-icons';
 import Api from '../services/axios';
 import { UserContext } from '../contexts/user';
 import { storeToken } from '../services/token';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { RootStackParamList } from '../types/types';
+import styles from '../styles/createProfile';
+import theme from '../styles/theme';
 
 type CreateAccountRouteProp = RouteProp<RootStackParamList, 'CreateAccount'>;
+
+// Schema de validação usando zod
+const createAccountSchema = z.object({
+  username: z.string().min(4, 'O nome de usuário deve ter pelo menos 4 caracteres'),
+  email: z.string().email('Digite um e-mail válido'),
+  password: z.string().min(9, 'A senha deve ter no mínimo 9 caracteres'),
+  confirmPassword: z.string().min(9, 'Confirme sua senha'),
+  location: z.string().min(1,'A localização é obrigatória'),
+}).refine(data => data.password === data.confirmPassword, {
+  message: 'As senhas não coincidem',
+  path: ['confirmPassword'],
+});
 
 const CreateAccountScreen = ({ navigation }: any) => {
   const userContext = useContext(UserContext);
@@ -20,40 +35,48 @@ const CreateAccountScreen = ({ navigation }: any) => {
   }
 
   const { setUser } = userContext;
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [location, setLocation] = useState('');
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(createAccountSchema),
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      location: '',
+    },
+  });
+
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-   useEffect(() => {
+  useEffect(() => {
     if (route.params?.newLocation) {
       const { latitude, longitude } = route.params.newLocation;
-      setLocation(`${latitude}, ${longitude}`);
+      setValue('location', `${latitude}, ${longitude}`);
     }
-  }, [route.params?.newLocation]);
-  
+  }, [route.params?.newLocation, setValue]);
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
 
-  const handleCreateAccount = async () => {
-    if (password !== confirmPassword) {
-      console.error('As senhas não coincidem');
-      return;
-    }
+  const handleCreateAccount = async (data: any) => {
+    const { username, email, password, location } = data;
+    const [lat, lon] = location.split(',').map((coord:string) => parseFloat(coord.trim()));
 
-    const [lat, lon] = location.split(',').map(coord => coord.trim());
     try {
       const userResponse = await Api.post('/users/', {
         username,
         email,
         password,
-        location: { lat, lon }, 
+        location: { lat, lon },
       });
       console.log('Conta criada com sucesso:', userResponse.data);
-      
       await storeToken(userResponse.data.token);
 
       setUser({
@@ -66,10 +89,10 @@ const CreateAccountScreen = ({ navigation }: any) => {
       });
 
       await Api.post('/localizations/', {
-      lon: route.params?.newLocation?.longitude, 
-      lat: route.params?.newLocation?.latitude,
-      userID: userResponse.data.id, 
-    });
+        lon: route.params?.newLocation?.longitude,
+        lat: route.params?.newLocation?.latitude,
+        userID: userResponse.data.id,
+      });
 
       navigation.navigate('Main', { screen: 'HomeScreen' });
     } catch (error) {
@@ -78,7 +101,7 @@ const CreateAccountScreen = ({ navigation }: any) => {
   };
 
   const navigateToMap = () => {
-    navigation.navigate('MapScreen')
+    navigation.navigate('MapScreen');
   };
 
   return (
@@ -87,68 +110,127 @@ const CreateAccountScreen = ({ navigation }: any) => {
       <Text style={styles.subtitle}>Crie sua conta abaixo</Text>
 
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Usuário"
-          placeholderTextColor={theme.colors.text}
-          onChangeText={setUsername}
-          value={username}
+        <Controller
+          control={control}
+          name="username"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="Usuário"
+                placeholderTextColor={theme.colors.text}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+              {errors.username && (
+                <Text style={styles.errorText}>{errors.username.message}</Text>
+              )}
+            </>
+          )}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="E-mail"
-          placeholderTextColor={theme.colors.text}
-          onChangeText={setEmail}
-          value={email}
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="E-mail"
+                placeholderTextColor={theme.colors.text}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+              {errors.email && (
+                <Text style={styles.errorText}>{errors.email.message}</Text>
+              )}
+            </>
+          )}
         />
       </View>
 
       <View style={styles.passwordContainer}>
-        <TextInput
-          style={styles.passwordInput}
-          placeholder="Senha"
-          secureTextEntry={!passwordVisible}
-          placeholderTextColor={theme.colors.text}
-          onChangeText={setPassword}
-          value={password}
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Senha"
+                secureTextEntry={!passwordVisible}
+                placeholderTextColor={theme.colors.text}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+              <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+                <Ionicons
+                  name={passwordVisible ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#FFFFFF"
+                />
+              </TouchableOpacity>
+              {errors.password && (
+                <Text style={styles.errorText}>{errors.password.message}</Text>
+              )}
+            </>
+          )}
         />
-        <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
-          <Ionicons
-            name={passwordVisible ? 'eye-off' : 'eye'}
-            size={24}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Confirmar Senha"
-          secureTextEntry={!passwordVisible}
-          placeholderTextColor={theme.colors.text}
-          onChangeText={setConfirmPassword}
-          value={confirmPassword}
+        <Controller
+          control={control}
+          name="confirmPassword"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="Confirmar Senha"
+                secureTextEntry={!passwordVisible}
+                placeholderTextColor={theme.colors.text}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+              />
+              {errors.confirmPassword && (
+                <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
+              )}
+            </>
+          )}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <TouchableOpacity onPress={navigateToMap} style={styles.inputWithIcon}>
-          <TextInput
-            style={styles.input}
-            placeholder="Localização"
-            placeholderTextColor="#FFFFFF"
-            value={location}
-            editable={false} 
-          />
-          <Ionicons name="map" size={24} color="#FFFFFF" style={styles.mapIcon} />
-        </TouchableOpacity>
+        <Controller
+          control={control}
+          name="location"
+          render={({ field: { value } }) => (
+            <>
+              <TouchableOpacity onPress={navigateToMap} style={styles.inputWithIcon}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Localização"
+                  placeholderTextColor="#FFFFFF"
+                  value={value}
+                  editable={false}
+                />
+                <Ionicons name="map" size={24} color="#FFFFFF" style={styles.mapIcon} />
+              </TouchableOpacity>
+              {errors.location && (
+                <Text style={styles.errorText}>{errors.location.message}</Text>
+              )}
+            </>
+          )}
+        />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit(handleCreateAccount)}>
         <Text style={styles.buttonText}>Criar Conta</Text>
       </TouchableOpacity>
 
